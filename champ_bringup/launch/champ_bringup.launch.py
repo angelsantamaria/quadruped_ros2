@@ -40,9 +40,9 @@ def generate_launch_description():
 
     use_simulator = LaunchConfiguration('use_simulator')
     use_sim_time = LaunchConfiguration('use_sim_time')
-    use_rviz = LaunchConfiguration("use_rviz")
+    # use_rviz = LaunchConfiguration("use_rviz")
     tf_prefix = LaunchConfiguration('tf_prefix')
-    rviz_config = LaunchConfiguration("rviz_config")
+    # rviz_config = LaunchConfiguration("rviz_config")
     champ_params = LaunchConfiguration('champ_params')
 
     declare_use_simulator = DeclareLaunchArgument(
@@ -53,19 +53,19 @@ def generate_launch_description():
         'use_sim_time',
         default_value='True',
         description='whether to use or not sim time.')
-    declare_use_rviz = DeclareLaunchArgument(
-        'use_rviz',
-        default_value='True',
-        description='...')
+    # declare_use_rviz = DeclareLaunchArgument(
+    #     'use_rviz',
+    #     default_value='True',
+    #     description='...')
     declare_tf_prefix = DeclareLaunchArgument(
         'tf_prefix',
         default_value='',
         description='...')
-    declare_rviz_config = DeclareLaunchArgument(
-        'rviz_config',
-        default_value=os.path.join(
-            champ_bringup_share_dir, 'rviz', 'default_view.rviz'),
-        description='...')
+    # declare_rviz_config = DeclareLaunchArgument(
+    #     'rviz_config',
+    #     default_value=os.path.join(
+    #         champ_bringup_share_dir, 'rviz', 'default_view.rviz'),
+    #     description='...')
     declare_champ_params = DeclareLaunchArgument(
         'champ_params',
         default_value=os.path.join(
@@ -86,17 +86,17 @@ def generate_launch_description():
         remappings=[('cmd_vel', 'vox_nav/cmd_vel')])
 
     # DECLARE THE msg relay ROS2 NODE
-    declare_state_estimation_node = Node(
-        package='champ_base',
-        executable='state_estimation',
-        name='state_estimation',
-        output='screen',
-        namespace='',
-        parameters=[{"use_sim_time": use_sim_time},
-                    champ_params],
-        remappings=[('cmd_vel', 'vox_nav/cmd_vel')],
-        #prefix=['xterm -e gdb -ex run --args'],
-    )
+    # declare_state_estimation_node = Node(
+    #     package='champ_base',
+    #     executable='state_estimation',
+    #     name='state_estimation',
+    #     output='screen',
+    #     namespace='',
+    #     parameters=[{"use_sim_time": use_sim_time},
+    #                 champ_params],
+    #     remappings=[('cmd_vel', 'vox_nav/cmd_vel')],
+    #     #prefix=['xterm -e gdb -ex run --args'],
+    # )
 
     xacro_file_name = 'champ/champ.urdf.xacro'
     #xacro_file_name = 'spot/spot.urdf.xacro'
@@ -141,14 +141,14 @@ def generate_launch_description():
         output='screen')
 
     #  INCLUDE RVIZ LAUNCH FILE IF use_rviz IS SET TO TRUE
-    declare_rviz_launch_include = IncludeLaunchDescription(PythonLaunchDescriptionSource(
-        os.path.join(champ_bringup_share_dir,
-                     'launch',
-                     'rviz.launch.py')),
-        condition=IfCondition(use_rviz),
-        launch_arguments={
-        'rviz_config': rviz_config
-    }.items())
+    # declare_rviz_launch_include = IncludeLaunchDescription(PythonLaunchDescriptionSource(
+    #     os.path.join(champ_bringup_share_dir,
+    #                  'launch',
+    #                  'rviz.launch.py')),
+    #     condition=IfCondition(use_rviz),
+    #     launch_arguments={
+    #     'rviz_config': rviz_config
+    # }.items())
 
     localization_params = LaunchConfiguration('localization_params')
     decleare_localization_params = DeclareLaunchArgument(
@@ -172,13 +172,13 @@ def generate_launch_description():
                                  remappings=[('odometry/filtered', 'odom')])
 
     load_joint_state_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
              'joint_state_broadcaster'],
         output='screen'
     )
 
     load_joint_trajectory_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
+        cmd=['ros2', 'control', 'load_controller', '--set-state', 'active',
              'joint_trajectory_controller'],
         output='screen'
     )
@@ -186,14 +186,14 @@ def generate_launch_description():
     return LaunchDescription([
         declare_use_simulator,
         declare_use_sim_time,
-        declare_use_rviz,
+        # declare_use_rviz,
         declare_tf_prefix,
-        declare_rviz_config,
+        # declare_rviz_config,
         declare_champ_params,
         declare_quadruped_controller_node,
-        declare_state_estimation_node,
+        # declare_state_estimation_node,
         declare_robot_state_publisher_node,
-        declare_rviz_launch_include,
+        # declare_rviz_launch_include,
         declare_spawn_entity_to_gazebo_node,
         declare_start_gazebo_cmd,
         decleare_localization_params,

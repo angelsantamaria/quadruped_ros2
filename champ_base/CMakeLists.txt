@@ -18,6 +18,7 @@ find_package(champ_msgs REQUIRED)
 find_package(champ REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(message_filters REQUIRED)
 find_package(urdf REQUIRED)
 
@@ -36,6 +37,7 @@ set(dependencies
   rclcpp
   tf2
   tf2_ros
+  tf2_geometry_msgs
   geometry_msgs
   nav_msgs
   sensor_msgs

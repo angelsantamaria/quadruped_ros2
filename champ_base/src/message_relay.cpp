@@ -149,7 +149,7 @@ void MessageRelay::jointStatesRawCallback(const champ_msgs::msg::Joints::ConstSh
     trajectory_msgs::msg::JointTrajectoryPoint point;
     point.positions.resize(12);
 
-    point.time_from_start = rclcpp::Duration(1.0 / 60.0);
+    point.time_from_start = rclcpp::Duration(1.0 / 60.0, 0);
     for (size_t i = 0; i < 12; i++) {
       point.positions[i] = msg->position[i];
     }
