@@ -98,8 +98,8 @@ def generate_launch_description():
     #     #prefix=['xterm -e gdb -ex run --args'],
     # )
 
-    xacro_file_name = 'champ/champ.urdf.xacro'
-    #xacro_file_name = 'spot/spot.urdf.xacro'
+    # xacro_file_name = 'champ/champ.urdf.xacro'
+    xacro_file_name = 'spot/spot.urdf.xacro'
 
     xacro_full_dir = os.path.join(
         champ_description_share_dir, 'urdf', xacro_file_name)

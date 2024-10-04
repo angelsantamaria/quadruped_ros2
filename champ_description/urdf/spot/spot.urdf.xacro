@@ -22,6 +22,14 @@
     <xacro:include filename="spot_leg.urdf.xacro" />
     <xacro:include filename="camera.xacro" />
 
+    <!-- Dummy base link without inertia -->
+    <link name="$(arg prefix)base_footprint" />
+
+    <joint name="$(arg prefix)base_footprint_joint" type="fixed">
+    <parent link="$(arg prefix)base_footprint" />
+    <child link="$(arg prefix)base_link" />
+    </joint>
+
     <link name="$(arg prefix)base_link">
         <visual>
             <geometry>
@@ -67,8 +75,8 @@
     <xacro:empty_link name="$(arg prefix)rear_rail" />
     <xacro:fixed_joint name="rear_rail_joint" parent="$(arg prefix)body" child="$(arg prefix)rear_rail" xyz="-0.223 0 0.0805" />
 
-    <xacro:spot_leg leg_name="front_left" prefix="$(arg prefix)" />
     <xacro:spot_leg leg_name="front_right" prefix="$(arg prefix)" />
+    <xacro:spot_leg leg_name="front_left" prefix="$(arg prefix)" />
     <xacro:spot_leg leg_name="rear_left" prefix="$(arg prefix)" />
     <xacro:spot_leg leg_name="rear_right" prefix="$(arg prefix)" />
 
@@ -160,7 +168,7 @@
                 <namespace></namespace>
                 <remapping>odom:=odom/ground_truth</remapping>
             </ros>
-            <body_name>base_link</body_name>
+            <body_name>body</body_name>
             <update_rate>20</update_rate>
             <xyz_offset>0 0 0</xyz_offset>
             <rpy_offset>0.0 0.0 0.0</rpy_offset>
