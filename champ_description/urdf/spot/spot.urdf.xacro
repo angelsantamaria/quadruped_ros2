@@ -13,8 +13,8 @@
     <xacro:arg name="simulate_cameras" default="False" />
     <xacro:arg name="simulate_imu" default="False" />
 
-    <xacro:arg name="body_color_r" default="${str(234/255.0)}" />
-    <xacro:arg name="body_color_g" default="${str(167/255.0)}" />
+    <xacro:arg name="body_color_r" default="${str(234.0/255.0)}" />
+    <xacro:arg name="body_color_g" default="${str(167.0/255.0)}" />
     <xacro:arg name="body_color_b" default="0" />
 
     <xacro:include filename="utils.xacro" />
@@ -23,12 +23,12 @@
     <xacro:include filename="camera.xacro" />
 
     <!-- Dummy base link without inertia -->
-    <link name="$(arg prefix)base_footprint" />
+    <!-- <link name="$(arg prefix)base_footprint" />
 
     <joint name="$(arg prefix)base_footprint_joint" type="fixed">
     <parent link="$(arg prefix)base_footprint" />
     <child link="$(arg prefix)base_link" />
-    </joint>
+    </joint> -->
 
     <link name="$(arg prefix)base_link">
         <visual>
