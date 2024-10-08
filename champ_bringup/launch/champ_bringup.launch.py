@@ -106,6 +106,12 @@ def generate_launch_description():
     xacro_full_dir = os.path.join(
         champ_description_share_dir, 'urdf', xacro_file_name)
 
+    # spot_description_share_dir = get_package_share_directory(
+    #     'spot_description')
+    # xacro_file_name = 'spot.urdf.xacro'
+    # xacro_full_dir = os.path.join(
+    #     spot_description_share_dir, 'urdf', xacro_file_name)
+
     print(xacro_full_dir)
 
     declare_robot_state_publisher_node = Node(
