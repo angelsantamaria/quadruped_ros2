@@ -34,6 +34,7 @@ joint_trajectory_controller:
       - position
     state_interfaces:
       - position
+      - velocity
 
     allow_partial_joints_goal: false # Defaults to false
     open_loop_control: false

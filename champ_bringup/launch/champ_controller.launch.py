@@ -127,7 +127,7 @@ def generate_launch_description():
                                                    {"use_sim_time": use_sim_time}],
                                                arguments=[
                                                    '-entity', '',
-                                                   '-topic', '/robot_description', "-z", "0.84"],
+                                                   '-topic', '/robot_description', "-z", "0.74"],
                                                output='screen')
 
     # START GAZEBO ONLY IF use_simulator IS SET TO TRUE
@@ -208,21 +208,21 @@ def generate_launch_description():
         #         ]
         #     )
         # ),
-        declare_use_simulator,
-        declare_use_sim_time,
-        declare_use_rviz,
-        declare_tf_prefix,
-        declare_rviz_config,
-        declare_champ_params,
-        declare_quadruped_controller_node,
-        declare_state_estimation_node,
-        declare_robot_state_publisher_node,
-        declare_rviz_launch_include,
-        declare_spawn_entity_to_gazebo_node,
-        declare_start_gazebo_cmd,
-        decleare_localization_params,
-        base_to_footprint_ekf,
-        footprint_to_odom_ekf,
-        load_joint_state_controller,
-        # load_joint_trajectory_controller,
+        # declare_use_simulator,
+        # declare_use_sim_time,
+        # declare_use_rviz,
+        # declare_tf_prefix,
+        # declare_rviz_config,
+        # declare_champ_params,
+        # declare_quadruped_controller_node,
+        # declare_state_estimation_node,
+        # declare_robot_state_publisher_node,
+        # declare_rviz_launch_include,
+        # declare_spawn_entity_to_gazebo_node,
+        # declare_start_gazebo_cmd,
+        # decleare_localization_params,
+        # base_to_footprint_ekf,
+        # footprint_to_odom_ekf,
+        # load_joint_state_controller,
+        load_joint_trajectory_controller,
     ])
