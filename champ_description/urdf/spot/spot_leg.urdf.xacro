@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-    <!-- <xacro:arg name="leg_kp" default="1e+07" /> -->
-    <!-- <xacro:arg name="leg_kd" default="100.0" /> -->
-    <!-- <xacro:arg name="leg_mu1" default="1.0" />
-    <xacro:arg name="leg_mu2" default="1.0" /> -->
-    <xacro:arg name="leg_kp" default="40000.0" />
+    <xacro:arg name="leg_kp" default="1e+07" />  <!--contact stiffness-->
+    <xacro:arg name="leg_kd" default="1.0" /> <!--damping-->
+    <xacro:arg name="leg_mu1" default="1e+07" />
+    <xacro:arg name="leg_mu2" default="0.8" />
+    <!-- <xacro:arg name="leg_kp" default="400000.0" />
     <xacro:arg name="leg_kd" default="1.0" />
     <xacro:arg name="leg_mu1" default="0.8" />
-    <xacro:arg name="leg_mu2" default="0.8" />
+    <xacro:arg name="leg_mu2" default="0.8" /> -->
     <xacro:arg name="leg_maxVel" default="0.0" />
     <xacro:arg name="leg_minDepth" default="0.002" />
     <xacro:arg name="leg_fdir1" default="" />
@@ -18,6 +18,9 @@
     <xacro:arg name="max_hip_x_velocity" default="15" />
     <xacro:arg name="max_hip_y_effort" default="80" />
     <xacro:arg name="max_hip_y_velocity" default="15" />
+    
+    <xacro:arg name="damping" default="0.0" />
+    <xacro:arg name="friction" default="1.0e+07" />
 
     <xacro:macro name="spot_leg" params="leg_name prefix">
 
@@ -56,21 +59,13 @@
                             izz="${(1/12) * hip_mass * (hip_length * hip_length + hip_width * hip_width)}" />     
             </inertial>
         </link>
-        <!-- <gazebo reference="${prefix}${leg_name}_hip">
-            <kp>$(arg leg_kp)</kp>
-            <kd>$(arg leg_kd)</kd>
-            <mu1>$(arg leg_mu1)</mu1>
-            <mu2>$(arg leg_mu2)</mu2>
-            <mu2>$(arg leg_maxVel)</mu2>
-            <mu2>$(arg leg_minDepth)</mu2>
-        </gazebo> -->
-        <joint name="${leg_name}_hip_x" type="revolute">
+        <joint name="${prefix}${leg_name}_hip_x" type="revolute">
             <origin xyz="${base_to_hip_xyz}" rpy="0 0 0" />
             <axis xyz="1 0 0" />
             <parent link="${prefix}base_link" />
             <child link="${prefix}${leg_name}_hip" />
             <limit effort="$(arg max_hip_x_effort)" velocity="$(arg max_hip_x_velocity)" lower="-0.78539816339744827899" upper="0.78539816339744827899" />
-            <dynamics damping="10.0" friction="1e+07" />
+            <dynamics damping="$(arg damping)" friction="$(arg friction)" />
         </joint>
 
         <link name="${prefix}${leg_name}_upper_leg">
@@ -94,21 +89,13 @@
                             izz="${(1/12) * upper_leg_mass * (upper_leg_length * upper_leg_length + upper_leg_width * upper_leg_width)}" />     
             </inertial>
         </link>
-        <!-- <gazebo reference="${prefix}${leg_name}_upper_leg">
-            <kp>$(arg leg_kp)</kp>
-            <kd>$(arg leg_kd)</kd>
-            <mu1>$(arg leg_mu1)</mu1>
-            <mu2>$(arg leg_mu2)</mu2>
-            <mu2>$(arg leg_maxVel)</mu2>
-            <mu2>$(arg leg_minDepth)</mu2>
-        </gazebo> -->
-        <joint name="${leg_name}_hip_y" type="revolute">
+        <joint name="${prefix}${leg_name}_hip_y" type="revolute">
             <origin xyz="${hip_to_upper_leg_xyz}" rpy="0 0 0" />
             <axis xyz="0 1 0" />
             <parent link="${prefix}${leg_name}_hip" />
             <child link="${prefix}${leg_name}_upper_leg" />
             <limit effort="$(arg max_hip_y_effort)" velocity="$(arg max_hip_y_velocity)" lower="-0.89884456477707963539" upper="2.2951079663725435509" />
-            <dynamics damping="10.0" friction="1e+07" />
+            <dynamics damping="$(arg damping)" friction="$(arg friction)" />
         </joint>
      
         <link name="${prefix}${leg_name}_lower_leg">
@@ -132,30 +119,13 @@
                          izz="${(1/12) * lower_leg_mass * (lower_leg_length * lower_leg_length + lower_leg_width * lower_leg_width)}" />
             </inertial>
         </link>
-        <gazebo reference="${prefix}${leg_name}_lower_leg">
-            <!-- <kp>$(arg leg_kp)</kp>
-            <kd>$(arg leg_kd)</kd>
-            <mu1>$(arg leg_mu1)</mu1>
-            <mu2>$(arg leg_mu2)</mu2>
-            <mu2>$(arg leg_maxVel)</mu2>
-            <mu2>$(arg leg_minDepth)</mu2> -->
-            <xacro:if value="${'$(arg leg_fdir1)' != ''}">
-                <fdir1>$(arg leg_fdir1)</fdir1>
-            </xacro:if>
-            <sensor name="contact" type="contact">
-                <contact>
-                    <collision>${leg_name}_lower_leg_collision</collision>
-                    <collision>${leg_name}_lower_leg_collision_1</collision>
-                </contact>
-            </sensor>
-        </gazebo>
-        <joint name="${leg_name}_knee" type="revolute">
+        <joint name="${prefix}${leg_name}_knee" type="revolute">
             <origin xyz="${upper_leg_to_lower_leg_x} 0 -${upper_leg_to_lower_leg_z}" rpy="0 0 0" />
             <axis xyz="0 1 0" />
             <parent link="${prefix}${leg_name}_upper_leg" />
             <child link="${prefix}${leg_name}_lower_leg" />
             <limit effort="$(arg max_knee_effort)" velocity="$(arg max_knee_velocity)" lower="-2.7929" upper="-0.254801" />
-            <dynamics damping="10.0" friction="1e+07" />
+            <dynamics damping="$(arg damping)" friction="$(arg friction)" />
         </joint>
     
         <!-- <xacro:empty_link name="${prefix}${leg_name}_ee" /> -->
@@ -172,19 +142,57 @@
             <child link="${prefix}${leg_name}_ee" />
             <origin xyz="0 0 -${lower_leg_to_foot_z}" rpy="0 0 0" />
             <limit effort="$(arg max_knee_effort)" velocity="$(arg max_knee_velocity)" lower="-2.7929" upper="-0.254801" />
-            <dynamics damping="10.0" friction="1e+07" />
+            <dynamics damping="$(arg damping)" friction="$(arg friction)" />
         </joint>
-        <!-- <gazebo reference="${prefix}${leg_name}_ee">
+  
+        <gazebo reference="${prefix}${leg_name}_ee">
             <kp>$(arg leg_kp)</kp>
             <kd>$(arg leg_kd)</kd>
             <mu1>$(arg leg_mu1)</mu1>
             <mu2>$(arg leg_mu2)</mu2>
-            <mu2>$(arg leg_maxVel)</mu2>
-            <mu2>$(arg leg_minDepth)</mu2>
-        </gazebo> -->
-    
+            <maxVel>$(arg leg_maxVel)</maxVel>
+            <minDepth>$(arg leg_minDepth)</minDepth>
+            <xacro:if value="${'$(arg leg_fdir1)' != ''}">
+                <fdir1>$(arg leg_fdir1)</fdir1>
+            </xacro:if>
+            <sensor name="contact" type="contact">
+                <contact>
+                    <collision>${leg_name}_lower_leg_collision</collision>
+                    <collision>${leg_name}_lower_leg_collision_1</collision>
+                </contact>
+            </sensor>
+            <maxContacts>1</maxContacts>
+            <minDepth>0.005</minDepth>
+            <gravity>true</gravity>
+            <collision name="${prefix}${leg_name}_ee_collision">
+                <geometry>
+                    <sphere>
+                        <!-- should be the same as surface_radius -->
+                        <radius>0.02175</radius>
+                    </sphere>
+                </geometry>
+            <surface>
+                <friction>
+                    <torsional>
+                        <coefficient>10</coefficient>
+                        <use_patch_radius>false</use_patch_radius>
+                        <!-- should be the same as collision sphere radius -->
+                        <surface_radius>0.02175</surface_radius>
+                        <patch_radius>0.01</patch_radius>
+                    </torsional>
+                </friction>
+                <contact>
+                    <poissons_ratio>0.5</poissons_ratio>
+                    <elastic_modulus>1e8</elastic_modulus>
+                </contact>
+            </surface>
+            </collision>
+            <material>Gazebo/Black</material>
+        </gazebo>
+
+
         <!-- Not actually used now, but doesn't hurt to have it here ready for future use with ros_ign_control. -->
-        <!-- <transmission name="${leg_name}_hip_x_trans">
+        <transmission name="${leg_name}_hip_x_trans">
             <type>transmission_interface/SimpleTransmission</type>
             <joint name="${leg_name}_hip_x">
                 <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
@@ -213,7 +221,7 @@
                 <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
                 <mechanicalReduction>1</mechanicalReduction>
             </actuator>
-        </transmission> -->
+        </transmission>
 
         <ros2_control name="${leg_name}_GazeboSystem" type="system">
             <hardware>
