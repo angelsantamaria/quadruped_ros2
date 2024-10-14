@@ -1,13 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-    <xacro:arg name="leg_kp" default="1e+07" />  <!--contact stiffness-->
-    <xacro:arg name="leg_kd" default="1.0" /> <!--damping-->
-    <xacro:arg name="leg_mu1" default="1e+07" />
-    <xacro:arg name="leg_mu2" default="0.8" />
-    <!-- <xacro:arg name="leg_kp" default="400000.0" />
+    <xacro:arg name="leg_kp" default="400000.0" />
     <xacro:arg name="leg_kd" default="1.0" />
-    <xacro:arg name="leg_mu1" default="0.8" />
-    <xacro:arg name="leg_mu2" default="0.8" /> -->
+    <xacro:arg name="leg_mu" default="0.8" />
+    <xacro:arg name="leg_mu2" default="0.8" />
     <xacro:arg name="leg_maxVel" default="0.0" />
     <xacro:arg name="leg_minDepth" default="0.002" />
     <xacro:arg name="leg_fdir1" default="" />
@@ -148,7 +144,7 @@
         <gazebo reference="${prefix}${leg_name}_ee">
             <kp>$(arg leg_kp)</kp>
             <kd>$(arg leg_kd)</kd>
-            <mu1>$(arg leg_mu1)</mu1>
+            <mu>$(arg leg_mu)</mu>
             <mu2>$(arg leg_mu2)</mu2>
             <maxVel>$(arg leg_maxVel)</maxVel>
             <minDepth>$(arg leg_minDepth)</minDepth>
@@ -175,7 +171,7 @@
                 <friction>
                     <torsional>
                         <coefficient>10</coefficient>
-                        <use_patch_radius>false</use_patch_radius>
+                        <use_patch_radius>true</use_patch_radius>
                         <!-- should be the same as collision sphere radius -->
                         <surface_radius>0.02175</surface_radius>
                         <patch_radius>0.01</patch_radius>
