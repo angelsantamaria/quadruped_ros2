@@ -24,6 +24,7 @@ from launch.substitutions import LaunchConfiguration
 from launch.substitutions import Command
 from launch.substitutions import PythonExpression
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.substitutions import FindPackageShare
 
 import os
 import xacro
@@ -191,6 +192,19 @@ def generate_launch_description():
         arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
         output='screen'
     )
+    # package_name_gazebo = 'champ_bringup'
+    # pkg_share_gazebo = FindPackageShare(package=package_name_gazebo).find(package_name_gazebo)
+    # ros_gz_bridge_config_file_path = 'config/ros_gz_bridge.yaml'
+    # default_ros_gz_bridge_config_file_path = os.path.join(pkg_share_gazebo, ros_gz_bridge_config_file_path)
+    # # Bridge ROS topics and Gazebo messages for establishing communication
+    # bridge = Node(
+    #     package='ros_gz_bridge',
+    #     executable='parameter_bridge',
+    #     parameters=[{
+    #     'config_file': default_ros_gz_bridge_config_file_path,
+    #     }],
+    #     output='screen'
+    # )  
 
     ground_plane_path=os.path.join(get_package_share_directory('champ_gazebo'), 'worlds', 'ground_plane.sdf')
     marsyard_path=os.path.join(get_package_share_directory('champ_gazebo'), 'worlds', 'marsyard2020.sdf')

@@ -55,6 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <trajectory_msgs/msg/joint_trajectory_point.hpp>
 #include <urdf/model.h>
 
+#include <rclcpp_action/rclcpp_action.hpp>
+#include <control_msgs/action/follow_joint_trajectory.hpp>
 
 class QuadrupedController : public rclcpp::Node
 {
@@ -90,6 +92,22 @@ class QuadrupedController : public rclcpp::Node
 
   void publishJoints(float target_joints[12]);
   void publishFootContacts(bool foot_contacts[4]);
+
+  rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SendGoalOptions opt_;
+  bool common_goal_accepted_;
+  rclcpp_action::ResultCode common_resultcode_;
+  int common_action_result_code_;
+  rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SharedPtr action_client_;
+  void callJonitsTrajectoryActionClient(float target_joints[12]);
+  void common_goal_response(
+    rclcpp_action::ClientGoalHandle
+    <control_msgs::action::FollowJointTrajectory>::SharedPtr future);
+  void common_result_response(
+    const rclcpp_action::ClientGoalHandle
+    <control_msgs::action::FollowJointTrajectory>::WrappedResult & result);
+  void common_feedback(
+    rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::SharedPtr,
+    const std::shared_ptr<const control_msgs::action::FollowJointTrajectory::Feedback> feedback);
 
   void cmdVelCallback(const geometry_msgs::msg::Twist::ConstSharedPtr msg);
   void cmdPoseCallback(const geometry_msgs::msg::Pose::ConstSharedPtr msg);

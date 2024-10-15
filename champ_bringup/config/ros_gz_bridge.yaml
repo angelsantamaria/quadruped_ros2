@@ -1,0 +1,96 @@
+# gz clock
+- ros_topic_name: "clock"
+  gz_topic_name: "clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "gz.msgs.Clock"
+  direction: GZ_TO_ROS
+
+# # gz topic subscribed by the JointPositionController plugin
+# - ros_topic_name: "joint_trajectory_controller/joint_trajectory"
+#   gz_topic_name: "model/spot/joint_trajectory"
+#   ros_type_name: "trajectory_msgs/msg/JointTrajectory"
+#   gz_type_name: "gz.msgs.JointTrajectory" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+
+########################
+
+# # gz topic published by the JointState plugin
+# - ros_topic_name: "joint_states"
+#   gz_topic_name: "joint_states"
+#   ros_type_name: "sensor_msgs/msg/JointState"
+#   gz_type_name: "ignition.msgs.Model" # In future, this will be gz.msgs.Model
+#   direction: GZ_TO_ROS
+
+# # gz topic subscribed by the JointPositionController plugin
+# - ros_topic_name: "model/spot/joint/front_left_hip_x/cmd_pos"
+#   gz_topic_name: "model/spot/joint/front_left_hip_x/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/front_left_hip_y/cmd_pos"
+#   gz_topic_name: "model/spot/joint/front_left_hip_y/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/front_left_knee/cmd_pos"
+#   gz_topic_name: "model/spot/joint/front_left_knee/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/front_right_hip_x/cmd_pos"
+#   gz_topic_name: "model/spot/joint/front_right_hip_x/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/front_right_hip_y/cmd_pos"
+#   gz_topic_name: "model/spot/joint/front_right_hip_y/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/front_right_knee/cmd_pos"
+#   gz_topic_name: "model/spot/joint/front_right_knee/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/rear_left_hip_x/cmd_pos"
+#   gz_topic_name: "model/spot/joint/rear_left_hip_x/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/rear_left_hip_y/cmd_pos"
+#   gz_topic_name: "model/spot/joint/rear_left_hip_y/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/rear_left_knee/cmd_pos"
+#   gz_topic_name: "model/spot/joint/rear_left_knee/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/rear_right_hip_x/cmd_pos"
+#   gz_topic_name: "model/spot/joint/rear_right_hip_x/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/rear_right_hip_y/cmd_pos"
+#   gz_topic_name: "model/spot/joint/rear_right_hip_y/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ
+
+# - ros_topic_name: "model/spot/joint/rear_right_knee/cmd_pos"
+#   gz_topic_name: "model/spot/joint/rear_right_knee/0/cmd_pos"
+#   ros_type_name: "std_msgs/msg/Float64"
+#   gz_type_name: "ignition.msgs.Double" # In future, this will be gz.msgs.Double
+#   direction: ROS_TO_GZ

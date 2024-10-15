@@ -281,7 +281,6 @@
         <plugin name="ign_ros2_control::IgnitionROS2ControlPlugin" filename="ign_ros2_control-system">
             <parameters>$(find champ_bringup)/config/ros2_control_spot.yaml</parameters>
         </plugin>
-
     </gazebo>
 
 </robot>

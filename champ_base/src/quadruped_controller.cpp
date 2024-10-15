@@ -137,7 +137,6 @@ QuadrupedController::QuadrupedController()
   }
   RCLCPP_INFO(get_logger(), "Parsed URDF, has got %s name", model.getName().c_str());
 
-
   // read links names from yaml
   std::vector<std::string> links_map;
   links_map.push_back("left_front_links");
@@ -192,6 +191,39 @@ QuadrupedController::QuadrupedController()
     }
   }
 
+  // Set Joints Trajectory action client
+  common_goal_accepted_ = false;
+  common_resultcode_ = rclcpp_action::ResultCode::UNKNOWN;
+  common_action_result_code_ = control_msgs::action::FollowJointTrajectory_Result::SUCCESSFUL;
+  
+  action_client_ = rclcpp_action::create_client<control_msgs::action::FollowJointTrajectory>(
+    parameter_client_node_->get_node_base_interface(),
+    parameter_client_node_->get_node_graph_interface(),
+    parameter_client_node_->get_node_logging_interface(),
+    parameter_client_node_->get_node_waitables_interface(),
+    "/joint_trajectory_controller/follow_joint_trajectory");
+
+  
+  while (!action_client_->wait_for_action_server(std::chrono::seconds(1))) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(
+        get_logger(),
+        "Interrupted while waiting for the action server. Exiting.");
+      rclcpp::shutdown();
+    }
+    RCLCPP_INFO(
+      get_logger(),
+      "Remote action server not available, waiting again...");
+  }
+  RCLCPP_INFO(
+      get_logger(),
+      "Server connected! Created action client.");
+
+  opt_.goal_response_callback = std::bind(&QuadrupedController::common_goal_response, this, std::placeholders::_1);
+  opt_.result_callback = std::bind(&QuadrupedController::common_result_response, this, std::placeholders::_1);
+  opt_.feedback_callback = std::bind(&QuadrupedController::common_feedback, this, std::placeholders::_1, std::placeholders::_2);
+  
+
   timer_ = this->create_wall_timer(
     std::chrono::milliseconds(static_cast<int>(1000 / loop_rate)),
     std::bind(&QuadrupedController::controlLoop, this));
@@ -213,8 +245,11 @@ void QuadrupedController::controlLoop()
     rosTimeToChampTime(this->now()));
   kinematics_.inverse(target_joint_positions, target_foot_positions);
 
+  
+
   publishFootContacts(foot_contacts);
   publishJoints(target_joint_positions);
+  callJonitsTrajectoryActionClient(target_joint_positions);
 
   //RCLCPP_DEBUG(get_logger(), "Executing control loop.. ");
 }
@@ -249,6 +284,118 @@ void QuadrupedController::cmdPoseCallback(const geometry_msgs::msg::Pose::ConstS
 
   RCLCPP_DEBUG(get_logger(), "Got go to pose command.. ");
 
+}
+
+void QuadrupedController::callJonitsTrajectoryActionClient(float target_joints[12])
+{
+  std::vector<trajectory_msgs::msg::JointTrajectoryPoint> points;
+
+  trajectory_msgs::msg::JointTrajectoryPoint point;
+  point.positions.resize(12);
+
+  // Assign the time_from_start value here
+  auto duration = std::chrono::duration<double>(1.0 / 60.0);
+  rclcpp::Duration point_time_from_start(duration);
+  point.time_from_start = point_time_from_start;
+  // point.time_from_start = rclcpp::Duration::from_seconds(0);
+
+  for (size_t i = 0; i < 12; i++) {
+    point.positions[i] = target_joints[i];
+  }
+  points.push_back(point);
+  
+  control_msgs::action::FollowJointTrajectory_Goal goal_msg;
+  goal_msg.goal_time_tolerance = rclcpp::Duration::from_seconds(1.0);
+  goal_msg.trajectory.joint_names = joint_names_;
+  goal_msg.trajectory.points = points;
+
+  auto goal_handle_future = action_client_->async_send_goal(goal_msg, opt_);
+  
+  if (rclcpp::spin_until_future_complete(parameter_client_node_, goal_handle_future) !=
+      rclcpp::FutureReturnCode::SUCCESS)
+  {
+    RCLCPP_ERROR(get_logger(), "send goal call failed :(");
+    // action_client_.reset();
+    return;
+  }
+  RCLCPP_ERROR(get_logger(), "send goal call ok :)");
+  
+  rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::SharedPtr
+    goal_handle = goal_handle_future.get();
+  if (!goal_handle) {
+    RCLCPP_ERROR(get_logger(), "Goal was rejected by server");
+    // action_client_.reset();
+    return;
+  }
+  RCLCPP_ERROR(get_logger(), "Goal was accepted by server");
+
+  // Wait for the server to be done with the goal
+  auto result_future = action_client_->async_get_result(goal_handle);
+  RCLCPP_INFO(get_logger(), "Waiting for result");
+  if (rclcpp::spin_until_future_complete(parameter_client_node_, result_future) !=
+    rclcpp::FutureReturnCode::SUCCESS)
+  {
+    RCLCPP_ERROR(get_logger(), "get result call failed :(");
+    // action_client_.reset();
+    return;
+  }
+
+  // action_client_.reset();
+}
+void QuadrupedController::common_goal_response(
+  rclcpp_action::ClientGoalHandle
+  <control_msgs::action::FollowJointTrajectory>::SharedPtr future)
+{
+  RCLCPP_DEBUG(
+    get_logger(), "common_goal_response time: %f",
+    rclcpp::Clock().now().seconds());
+  auto goal_handle = future.get();
+  if (!goal_handle) {
+    common_goal_accepted_ = false;
+    printf("Goal rejected\n");
+  } else {
+    common_goal_accepted_ = true;
+    printf("Goal accepted\n");
+  }
+}
+
+void QuadrupedController::common_result_response(
+  const rclcpp_action::ClientGoalHandle
+  <control_msgs::action::FollowJointTrajectory>::WrappedResult & result)
+{
+  printf("common_result_response time: %f\n", rclcpp::Clock().now().seconds());
+  common_resultcode_ = result.code;
+  common_action_result_code_ = result.result->error_code;
+  switch (result.code) {
+    case rclcpp_action::ResultCode::SUCCEEDED:
+      printf("SUCCEEDED result code\n");
+      break;
+    case rclcpp_action::ResultCode::ABORTED:
+      printf("Goal was aborted\n");
+      return;
+    case rclcpp_action::ResultCode::CANCELED:
+      printf("Goal was canceled\n");
+      return;
+    default:
+      printf("Unknown result code\n");
+      return;
+  }
+}
+
+void QuadrupedController::common_feedback(
+  rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::SharedPtr,
+  const std::shared_ptr<const control_msgs::action::FollowJointTrajectory::Feedback> feedback)
+{
+  std::cout << "feedback->desired.positions :";
+  for (auto & x : feedback->desired.positions) {
+    std::cout << x << "\t";
+  }
+  std::cout << std::endl;
+  std::cout << "feedback->desired.velocities :";
+  for (auto & x : feedback->desired.velocities) {
+    std::cout << x << "\t";
+  }
+  std::cout << std::endl;
 }
 
 void QuadrupedController::publishJoints(float target_joints[12])

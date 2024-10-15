@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.5">
-  <world name="demo">
+  <world name="void">
     <model name="ground_plane">
       <static>true</static>
       <link name="link">
@@ -29,6 +29,10 @@
         <uri>file:///home/diya/spot_subt_ws/install/champ_gazebo/share/champ_gazebo/models/spot</uri>
       </include>
     </model> -->
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
+    </include>
 
   </world>
 </sdf>
