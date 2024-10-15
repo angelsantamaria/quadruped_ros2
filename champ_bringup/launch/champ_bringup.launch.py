@@ -15,33 +15,34 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from launch.actions import DeclareLaunchArgument
+from launch.actions import RegisterEventHandler
 from launch.actions import IncludeLaunchDescription
 from launch.actions import ExecuteProcess
-from launch.actions import LogInfo, RegisterEventHandler
+from launch.event_handlers import OnProcessExit
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration
 from launch.substitutions import Command
 from launch.substitutions import PythonExpression
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.event_handlers import OnProcessStart, OnExecutionComplete
 
 import os
+import xacro
 
 # This will only take in effect if you are running in Simulation
 os.environ['GAZEBO_MODEL_PATH'] = os.path.join(get_package_share_directory('champ_gazebo'),
                                                'models')
-
+os.environ['GZ_SIM_SYSTEM_PLUGIN_PATH'] = "/opt/ros/humble/lib/"
 
 def generate_launch_description():
 
-    # Get hare directories of packages
+    # Get here directories of packages
     champ_bringup_share_dir = get_package_share_directory(
         'champ_bringup')
     champ_description_share_dir = get_package_share_directory(
         'champ_description')
 
     use_simulator = LaunchConfiguration('use_simulator')
-    use_sim_time = LaunchConfiguration('use_sim_time')
+    use_sim_time = LaunchConfiguration('use_sim_time', default=True)
     use_rviz = LaunchConfiguration("use_rviz")
     tf_prefix = LaunchConfiguration('tf_prefix')
     rviz_config = LaunchConfiguration("rviz_config")
@@ -54,11 +55,11 @@ def generate_launch_description():
     declare_use_sim_time = DeclareLaunchArgument(
         'use_sim_time',
         default_value='True',
-        description='whether to use or not sim time.')
+        description='If true, use simulated clock')
     declare_use_rviz = DeclareLaunchArgument(
         'use_rviz',
         default_value='True',
-        description='...')
+        description='whether or not to launch rviz')
     declare_tf_prefix = DeclareLaunchArgument(
         'tf_prefix',
         default_value='',
@@ -78,39 +79,36 @@ def generate_launch_description():
     declare_quadruped_controller_node = Node(
         package='champ_base',
         executable='quadruped_controller',
-        name='quadruped_controller',
+        # name='quadruped_controller',
         output='screen',
-        namespace='',
+        # namespace='',
         arguments=['--ros-args', '--log-level', 'INFO'],
         # prefix=['xterm -e gdb -ex run --args'],
-        parameters=[{"use_sim_time": use_sim_time},
+        parameters=[
+            # {"use_sim_time": use_sim_time},
                     champ_params],
-        remappings=[('cmd_vel', 'vox_nav/cmd_vel')])
+        remappings=[('cmd_vel', 'vox_nav/cmd_vel')]
+        )
 
     # DECLARE THE msg relay ROS2 NODE
     declare_state_estimation_node = Node(
         package='champ_base',
         executable='state_estimation',
-        name='state_estimation',
+        # name='state_estimation',
         output='screen',
-        namespace='',
-        parameters=[{"use_sim_time": use_sim_time},
+        # namespace='',
+        parameters=[
+            # {"use_sim_time": use_sim_time},
                     champ_params],
-        remappings=[('cmd_vel', 'vox_nav/cmd_vel')],
+        remappings=[('cmd_vel', 'vox_nav/cmd_vel')]
         #prefix=['xterm -e gdb -ex run --args'],
     )
 
-    # xacro_file_name = 'champ/champ.urdf.xacro'
+    #xacro_file_name = 'champ/champ.urdf.xacro'
     xacro_file_name = 'spot/spot.urdf.xacro'
 
     xacro_full_dir = os.path.join(
         champ_description_share_dir, 'urdf', xacro_file_name)
-
-    # spot_description_share_dir = get_package_share_directory(
-    #     'spot_description')
-    # xacro_file_name = 'spot.urdf.xacro'
-    # xacro_full_dir = os.path.join(
-    #     spot_description_share_dir, 'urdf', xacro_file_name)
 
     print(xacro_full_dir)
 
@@ -124,30 +122,24 @@ def generate_launch_description():
         remappings=[('/tf', 'tf'),
                     ('/tf_static', 'tf_static')])
 
-    # SPAWN THE ROBOT TO GAZEBO IF use_simulator, FROM THE TOPIC "robot_description"
-    declare_spawn_entity_to_gazebo_node = Node(package='gazebo_ros',
-                                               condition=IfCondition(
-                                                   use_simulator),
-                                               executable='spawn_entity.py',
-                                               parameters=[
-                                                   {"use_sim_time": use_sim_time}],
-                                               arguments=[
-                                                   '-entity', '',
-                                                   '-topic', '/robot_description', "-z", "0.84"],
-                                               output='screen')
+    # Spawn the robot in Ignition Gazebo
+    declare_spawn_entity_to_gazebo_node = Node(
+        package='ros_gz_sim',
+        executable='create',
+        condition=IfCondition(use_simulator),
+        arguments=['-name', 'spot',
+                   '-allow_renaming', 'true',
+                   '-topic', '/robot_description', "-z", "0.84"],
+        output='screen',
+        parameters=[{"use_sim_time": use_sim_time}])
 
-    # START GAZEBO ONLY IF use_simulator IS SET TO TRUE
-    gazebo_world = os.path.join(
-        get_package_share_directory('champ_gazebo'), 'worlds/', 'void.world'),
-    declare_start_gazebo_cmd = ExecuteProcess(
-        cmd=[
-            'gazebo', '--verbose', gazebo_world,
-            # '-u',
-            '-s', 'libgazebo_ros_factory.so', '-s', 'libgazebo_ros_init.so'
-        ],
-        condition=IfCondition(PythonExpression(
-            [use_simulator])),
-        output='screen')
+    # Start Ignition Gazebo
+    # gazebo_world = os.path.join(get_package_share_directory('champ_gazebo'), 'worlds/', 'ground_plane.sdf')
+    # declare_start_gazebo_cmd = ExecuteProcess(
+    #     cmd=['ign', 'gazebo', gazebo_world],
+    #     condition=IfCondition(PythonExpression([use_simulator])),
+    #     output='screen')  
+
 
     #  INCLUDE RVIZ LAUNCH FILE IF use_rviz IS SET TO TRUE
     declare_rviz_launch_include = IncludeLaunchDescription(PythonLaunchDescriptionSource(
@@ -160,7 +152,7 @@ def generate_launch_description():
     }.items())
 
     localization_params = LaunchConfiguration('localization_params')
-    decleare_localization_params = DeclareLaunchArgument(
+    declare_localization_params = DeclareLaunchArgument(
         'localization_params',
         default_value=os.path.join(
             champ_bringup_share_dir, 'config', 'robot_localization_params.yaml'),
@@ -192,43 +184,51 @@ def generate_launch_description():
         output='screen'
     )
 
+    # added by diya 9/4
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'],
+        output='screen'
+    )
+
+    ground_plane_path=os.path.join(get_package_share_directory('champ_gazebo'), 'worlds', 'ground_plane.sdf')
+    marsyard_path=os.path.join(get_package_share_directory('champ_gazebo'), 'worlds', 'marsyard2020.sdf')
+
     return LaunchDescription([
-        # RegisterEventHandler(
-        #     # OnProcessStart(
-        #     #     target_action=declare_start_gazebo_cmd,
-        #     #     on_start=[LogInfo(msg="Started Gazebo."), 
-        #     #               load_joint_trajectory_controller]
-        #     # )
-        #     # OnExecutionComplete(
-        #     #     target_action=declare_start_gazebo_cmd,
-        #     #     on_completion=[
-        #     #         LogInfo(msg="Started Gazebo."), 
-        #     #         load_joint_trajectory_controller,
-        #     #     ]
-        #     # )
-        #     OnExecutionComplete(
-        #         target_action=declare_start_gazebo_cmd,
-        #         on_completion=[
-        #             LogInfo(msg="Started Gazebo."), 
-        #             load_joint_trajectory_controller,
-        #         ]
-        #     )
-        # ),
+        bridge,
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                [os.path.join(get_package_share_directory('ros_ign_gazebo'),
+                              'launch', 'ign_gazebo.launch.py')]),
+            launch_arguments=[('gz_args', [' -r -v 4 ', ground_plane_path])]),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=declare_spawn_entity_to_gazebo_node,
+                on_exit=[load_joint_state_controller],
+            )
+        ),
+        RegisterEventHandler(
+            event_handler=OnProcessExit(
+                target_action=load_joint_state_controller,
+                on_exit=[load_joint_trajectory_controller],
+            )
+        ),
         declare_use_simulator,
-        declare_use_sim_time,
         declare_use_rviz,
         declare_tf_prefix,
         declare_rviz_config,
         declare_champ_params,
+        # declare_start_gazebo_cmd,
         declare_quadruped_controller_node,
         declare_state_estimation_node,
         declare_robot_state_publisher_node,
         declare_rviz_launch_include,
         declare_spawn_entity_to_gazebo_node,
-        declare_start_gazebo_cmd,
-        decleare_localization_params,
-        base_to_footprint_ekf,
+        declare_localization_params,
         footprint_to_odom_ekf,
-        load_joint_state_controller,
+        base_to_footprint_ekf,
+        # load_joint_state_controller,
         # load_joint_trajectory_controller,
+        declare_use_sim_time     
     ])

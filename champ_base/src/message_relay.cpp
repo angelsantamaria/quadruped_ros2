@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #include <message_relay.hpp>
-
+#include <chrono>
 MessageRelay::MessageRelay()
 : Node("message_relay_node")
 {
@@ -149,10 +149,15 @@ void MessageRelay::jointStatesRawCallback(const champ_msgs::msg::Joints::ConstSh
     trajectory_msgs::msg::JointTrajectoryPoint point;
     point.positions.resize(12);
 
-    point.time_from_start = rclcpp::Duration(1.0 / 60.0, 0);
+    auto duration = std::chrono::duration<double>(1.0 / 60.0);
+
+    rclcpp::Duration point_time_from_start(duration);
     for (size_t i = 0; i < 12; i++) {
       point.positions[i] = msg->position[i];
     }
+
+    // Assign the time_from_start value here
+    point.time_from_start = point_time_from_start;
 
     joints_cmd_msg.points.push_back(point);
     joint_commands_publisher_->publish(joints_cmd_msg);
